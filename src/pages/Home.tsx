@@ -45,9 +45,12 @@ const Home: React.FC = () => {
     <div className="overflow-x-hidden">
       {/* HERO SECTION */}
       <section className="relative min-h-screen flex items-center justify-center pt-20 px-4 overflow-hidden">
-        {/* Animated Background Placeholder */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(200,150,12,0.1),transparent_70%)] opacity-50" />
-        <div className="absolute inset-0 bg-black -z-10" />
+        {/* Background Image */}
+        <div className="absolute inset-0 bg-[url('/hero-bg.png')] bg-cover bg-center bg-no-repeat -z-20" />
+        {/* Premium Dark Gradient Overlay to make text pop */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/95 -z-10" />
+        {/* Subtle gold radial glow behind the center text */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(212,175,55,0.2),transparent_60%)] -z-10" />
 
         <div className="container mx-auto text-center relative z-10">
           <motion.div
