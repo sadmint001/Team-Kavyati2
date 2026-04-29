@@ -1,0 +1,88 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      // Identity Integrity check
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- Entities ---
+
+    // 1. Users
+    // Hardened User Rule with "8 Pillars" inclusion
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.full_name is string && data.full_name.size() > 0 && data.full_name.size() <= 100 &&
+               data.email is string && data.email.size() <= 256 &&
+               data.role in ['user', 'admin'] &&
+               (data.subscription_tier == null || data.subscription_tier in ['bronze', 'silver', 'gold']) &&
+               data.keys().hasAll(['full_name', 'email', 'role', 'subscription_tier', 'created_at', 'is_suspended']) &&
+               data.keys().size() == 6;
+      }
+
+      // Pillar 6: PII Isolation - Only owner or admin can read profiles
+      allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
+      // Pillar 8: Secure List Queries - Only admins can list users
+      allow list: if isAdmin();
+
+      // Pillar 2: Validation Blueprints (Anti-Update-Gap)
+      allow create: if isVerified() && isOwner(userId) &&
+                       isValidUser(request.resource.data) &&
+                       request.resource.data.role == 'user' && // No self-elevation
+                       request.resource.data.subscription_tier == null;
+
+      // Pillar 4: Tiered Identity Logic
+      allow update: if isVerified() && (
+        (isOwner(userId) && (
+          // Action: Update Profile Info (Whitelisted fields)
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['full_name'])
+        )) || 
+        isAdmin() // Admin escape hatch
+      );
+    }
+
+    // 2. Subscriptions
+    match /subscriptions/{subId} {
+      function isValidSubscription(data) {
+        return data.user_id is string &&
+               data.tier in ['bronze', 'silver', 'gold'] &&
+               data.amount_kes is int &&
+               data.status in ['active', 'expired', 'cancelled'] &&
+               data.started_at is timestamp &&
+               data.expires_at is timestamp;
+      }
+
+      allow get: if isSignedIn() && (isOwner(resource.data.user_id) || isAdmin());
+      allow list: if isSignedIn() && (resource.data.user_id == request.auth.uid || isAdmin());
+
+      allow create, update: if isAdmin(); // Pillar 7: Atomicity usually handled via backend/admin
+    }
+
+    // 3. Audit Logs
+    match /audit_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

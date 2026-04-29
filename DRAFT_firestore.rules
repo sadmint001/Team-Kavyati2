@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- Entities ---
+
+    // 1. Users
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.full_name is string && data.full_name.size() > 0 && data.full_name.size() <= 100 &&
+               data.email is string && data.email.size() <= 256 &&
+               data.role in ['user', 'admin'] &&
+               (data.subscription_tier == null || data.subscription_tier in ['bronze', 'silver', 'gold']) &&
+               data.created_at == request.time;
+      }
+
+      allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin(); // Only admins can list all users
+
+      allow create: if isVerified() && isOwner(userId) &&
+                       isValidUser(request.resource.data) &&
+                       request.resource.data.role == 'user' && // Prevent self-elevating to admin
+                       request.resource.data.subscription_tier == null;
+
+      allow update: if isVerified() && isOwner(userId) && (
+        // Action: Update Profile
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['full_name'])) ||
+        // Action: Cancel Subscription (Simplified)
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['subscription_tier']) && request.resource.data.subscription_tier == null)
+      ) || isAdmin();
+    }
+
+    // 2. Subscriptions
+    match /subscriptions/{subId} {
+      function isValidSubscription(data) {
+        return data.user_id is string &&
+               data.tier in ['bronze', 'silver', 'gold'] &&
+               data.amount_kes is int &&
+               data.status in ['active', 'expired', 'cancelled'] &&
+               data.started_at is timestamp &&
+               data.expires_at is timestamp;
+      }
+
+      allow get: if isSignedIn() && (isOwner(resource.data.user_id) || isAdmin());
+      allow list: if isSignedIn() && (resource.data.user_id == request.auth.uid || isAdmin());
+
+      allow create: if isAdmin(); // Subscriptions are likely created via webhook/admin
+      allow update: if isAdmin();
+    }
+
+    // 3. Audit Logs
+    match /audit_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

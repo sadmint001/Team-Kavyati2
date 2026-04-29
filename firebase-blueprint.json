@@ -1,0 +1,62 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents a member of Team Kavyati.",
+      "type": "object",
+      "properties": {
+        "full_name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "subscription_tier": { "type": "string", "enum": ["bronze", "silver", "gold", null] },
+        "subscription_expires_at": { "type": "string", "format": "date-time" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "is_suspended": { "type": "boolean" }
+      },
+      "required": ["full_name", "email", "role", "created_at"]
+    },
+    "Subscription": {
+      "title": "Subscription",
+      "description": "Represents a payment record and its status.",
+      "type": "object",
+      "properties": {
+        "user_id": { "type": "string" },
+        "tier": { "type": "string", "enum": ["bronze", "silver", "gold"] },
+        "amount_kes": { "type": "integer" },
+        "payment_reference": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "expired", "cancelled"] },
+        "started_at": { "type": "string", "format": "date-time" },
+        "expires_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["user_id", "tier", "amount_kes", "status", "started_at", "expires_at"]
+    },
+    "AuditLog": {
+      "title": "Audit Log",
+      "description": "Tracks administrative actions.",
+      "type": "object",
+      "properties": {
+        "admin_id": { "type": "string" },
+        "action": { "type": "string" },
+        "target_user_id": { "type": "string" },
+        "metadata": { "type": "object" },
+        "performed_at": { "type": "string", "format": "date-time" },
+        "ip_address": { "type": "string" }
+      },
+      "required": ["admin_id", "action", "performed_at"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile data."
+    },
+    "/subscriptions/{subId}": {
+      "schema": "Subscription",
+      "description": "Subscription payment history."
+    },
+    "/audit_logs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Logs for security auditing."
+    }
+  }
+}
