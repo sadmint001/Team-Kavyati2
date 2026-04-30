@@ -31,77 +31,51 @@ import { Label } from "../components/ui/label";
 
 const Dashboard: React.FC = () => {
   const { user, subscriptionTier, role } = useAuth();
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedTier, setSelectedTier] = useState<any>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isWaiting, setIsWaiting] = useState(false);
 
-  const handleOpenPayment = (tier: any) => {
-    setSelectedTier(tier);
-    setIsDialogOpen(true);
-  };
+  const handleMpesaPay = (tier: any) => {
+    const amount = tier.price.replace(/,/g, '');
+    const randomSuffix = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const checkoutRequestId = `KAV_${Date.now()}_${randomSuffix}`;
+    const customerName = user?.displayName || 'KAVYATI_MEMBER';
 
-  const handleMpesaPay = async () => {
-    if (!phoneNumber) {
-      toast.error("Please enter a valid phone number");
-      return;
-    }
+    // Construct the Lipwa Link with pre-filled details and UI hiding attempts
+    const lipwaLink = `https://lipwa.link/8237?amount=${amount}&customer_name=${encodeURIComponent(customerName)}&external_reference=${checkoutRequestId}&provider=m-pesa&hide_merchant=1&hide_branding=1&hide_details=1&hide_header=1`;
 
-    setIsProcessing(true);
-    const toastId = toast.loading('Initiating STK Push...');
-    const amount = parseInt(selectedTier.price.replace(/,/g, ''));
+    // Centered Popup Logic
+    const width = 500;
+    const height = 700;
+    const left = (window.screen.width / 2) - (width / 2);
+    const top = (window.screen.height / 2) - (height / 2);
 
-    try {
-      const response = await fetch('/api/pay', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          phoneNumber, 
-          amount,
-          userId: user?.uid,
-          tierId: selectedTier.id
-        }),
-      });
+    setIsWaiting(true);
+    toast.success('Secure Checkout Opening...', {
+      description: 'Complete your payment in the pop-up window.'
+    });
 
-      // Check if the response is actually JSON
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const text = await response.text();
-        console.error("Non-JSON response received:", text.substring(0, 200));
-        throw new Error("The server returned a page instead of a response. Check your Netlify functions deployment.");
-      }
+    const paymentWindow = window.open(
+      lipwaLink, 
+      'PayHeroCheckout', 
+      `width=${width},height=${height},top=${top},left=${left},status=no,menubar=no,toolbar=no,location=no`
+    );
 
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success('STK Push Sent! 📱', {
-          id: toastId,
-          description: 'Please check your phone and enter your M-Pesa PIN.'
-        });
-        setIsDialogOpen(false);
-      } else {
-        const serverError = data.fullError?.errorMessage || data.error || "Payment failed to initiate";
-        toast.error("Payment Failed", {
-          id: toastId,
-          description: serverError,
+    // Check if window is closed to remove the waiting state
+    const timer = setInterval(() => {
+      if (paymentWindow?.closed) {
+        clearInterval(timer);
+        setIsWaiting(false);
+        toast.info('Payment window closed.', {
+          description: 'If you completed the payment, your status will update shortly.'
         });
       }
-    } catch (error: any) {
-      console.error("Payment Initiation Error:", error);
-      toast.error("Connection Error", {
-        id: toastId,
-        description: error.message || "Could not connect to the payment server.",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
+    }, 1000);
   };
 
   const tiers = [
     {
       id: 'bronze',
       name: 'Bronze',
-      price: '10,000',
+      price: '10',
       icon: <Target className="w-8 h-8 text-orange-400" />,
       features: ['Community access', 'Weekly challenges', 'Accountability check-ins'],
       color: 'bg-orange-950/20 text-orange-400 border-orange-400/30'
@@ -126,7 +100,25 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-12 pb-24">
+    <div className="container mx-auto px-4 py-12 pb-24 relative">
+      {/* Waiting Overlay */}
+      {isWaiting && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center text-center p-6">
+          <div className="p-8 border border-primary-gold/30 bg-black/40 rounded-2xl max-w-md">
+            <Loader2 className="w-16 h-16 text-primary-gold animate-spin mx-auto mb-6" />
+            <h2 className="text-3xl font-heading text-white mb-4 uppercase tracking-widest text-glow-gold">Payment In Progress</h2>
+            <p className="text-muted-foreground mb-8">Please complete the payment in the secure pop-up window. Do not close this page.</p>
+            <Button 
+              variant="outline" 
+              className="border-white/10 text-white hover:bg-white/5"
+              onClick={() => setIsWaiting(false)}
+            >
+              Cancel & Return
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Welcome Banner */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -214,7 +206,7 @@ const Dashboard: React.FC = () => {
                   </CardContent>
                   <CardFooter className="p-10 pt-0">
                     <Button 
-                      onClick={() => handleOpenPayment(tier)}
+                      onClick={() => handleMpesaPay(tier)}
                       disabled={subscriptionTier === tier.id}
                       className={`w-full h-14 uppercase font-black tracking-[0.2em] text-xs transition-all duration-500 rounded-none ${subscriptionTier === tier.id ? 'bg-primary-gold/10 text-primary-gold/50 cursor-default border border-primary-gold/20' : 'bg-primary-gold hover:bg-gold-light text-black shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)]'}`}
                     >
@@ -226,55 +218,6 @@ const Dashboard: React.FC = () => {
             ))}
          </div>
       </div>
-
-      {/* Payment Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px] bg-black border-primary-gold/30 text-white">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-heading text-primary-gold uppercase">Secure M-Pesa Checkout</DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              Enter your M-Pesa number to receive the payment prompt for your {selectedTier?.name} commitment.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-6 py-6">
-            <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
-              <span className="text-sm font-heading uppercase">Amount to pay:</span>
-              <span className="text-xl font-heading text-primary-gold">KES {selectedTier?.price}</span>
-            </div>
-            <div className="space-y-3">
-              <Label htmlFor="phone" className="text-white uppercase tracking-widest text-xs font-bold">M-Pesa Number</Label>
-              <div className="relative">
-                <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-gold" />
-                <Input
-                  id="phone"
-                  placeholder="e.g. 07XXXXXXXX"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="bg-white/5 border-white/20 pl-10 focus:border-primary-gold text-white placeholder:text-white/20"
-                />
-              </div>
-              <p className="text-[10px] text-muted-foreground italic tracking-tight">Format: 07XXXXXXXX or 254XXXXXXXXX</p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button 
-              type="submit" 
-              onClick={handleMpesaPay}
-              disabled={isProcessing || !phoneNumber}
-              className="w-full bg-primary-gold hover:bg-gold-light text-black font-black uppercase tracking-widest h-12"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Initiating...
-                </>
-              ) : (
-                "Prompt M-Pesa PIN"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
