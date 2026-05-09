@@ -50,7 +50,7 @@ const Footer: React.FC = () => {
             <h4 className="font-heading text-primary-gold mb-4 text-sm tracking-widest uppercase">Contact</h4>
              <p className="text-sm text-muted-foreground">
                 Questions? Impact our team.<br/>
-                charlesouma60@gmail.com
+                info@teamkavyati.co.ke
              </p>
           </div>
         </div>

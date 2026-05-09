@@ -360,29 +360,25 @@ const Home: React.FC = () => {
             {[
               {
                 name: "Brian K.",
-                role: "Entrepreneur",
-                quote: "Before Kavyati, I was just spinning my wheels. The discipline systems helped me scale my agency to $10k/month in just 90 days.",
+                quote: "Before Kavyati, I was just surviving. The discipline and the money password helped me scale my income drastically in just 90 days.",
                 stars: 5,
                 initials: "BK"
               },
               {
                 name: "Sarah M.",
-                role: "Tech Lead",
-                quote: "The accountability check-ins are brutal but necessary. I finally feel like I'm in control of my time and my career trajectory.",
+                quote: "The accountability check-ins are brutal but necessary. I finally feel like I have the 'Siri Ya kuwa Tajiri' and I'm in control of my wealth.",
                 stars: 5,
                 initials: "SM"
               },
               {
                 name: "David O.",
-                role: "Fitness Coach",
-                quote: "The circle of like-minded individuals here is unmatched. We push each other to the limit every single day. Rejecting mediocrity is a lifestyle.",
+                quote: "The circle of like-minded individuals here is unmatched. We push each other to the limit every single day to reject poverty and build our empires.",
                 stars: 5,
                 initials: "DO"
               },
               {
                 name: "James W.",
-                role: "Software Engineer",
-                quote: "The ‘Kavyati Path’ gave me a roadmap when I was lost. I’ve never been this focused or intentional about my future.",
+                quote: "The ‘Kavyati Path’ gave me the exact formula to follow when I was lost. I’ve never been this focused or intentional about my future.",
                 stars: 5,
                 initials: "JW"
               }
@@ -395,8 +391,7 @@ const Home: React.FC = () => {
                   </div>
 
                   <div className="mt-8 flex-grow">
-                    <h3 className="text-xl font-heading text-white mb-1">{testimonial.name}</h3>
-                    <p className="text-xs text-primary-gold uppercase tracking-widest mb-6">{testimonial.role}</p>
+                    <h3 className="text-xl font-heading text-white mb-6">{testimonial.name}</h3>
                     <p className="text-muted-foreground text-sm leading-relaxed italic">
                       "{testimonial.quote}"
                     </p>
