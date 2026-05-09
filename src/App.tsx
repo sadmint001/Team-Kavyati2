@@ -10,6 +10,7 @@ import SecurityWrapper from './components/layout/SecurityWrapper';
 import { Toaster } from './components/ui/sonner';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
+import FloatingWhatsApp from './components/ui/FloatingWhatsApp';
 
 // Pages
 import Home from './pages/Home';
@@ -58,6 +59,7 @@ function AppContent() {
           </main>
           <Footer />
         </div>
+        <FloatingWhatsApp />
         <Toaster theme="dark" position="top-right" />
       </SecurityWrapper>
     </Router>
