@@ -48,7 +48,7 @@ service cloud.firestore {
       allow list: if isAdmin();
 
       // Pillar 2: Validation Blueprints (Anti-Update-Gap)
-      allow create: if isVerified() && isOwner(userId) &&
+      allow create: if isSignedIn() && isOwner(userId) &&
                        isValidUser(request.resource.data) &&
                        request.resource.data.role == 'user' && // No self-elevation
                        request.resource.data.subscription_tier == null;

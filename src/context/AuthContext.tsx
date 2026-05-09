@@ -94,6 +94,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       await updateProfile(cred.user, { displayName: name });
+      // Fix race condition: onAuthStateChanged may have created the DB record with 'Anonymous' 
+      // before updateProfile finished. Update it here to ensure correct name.
+      await dbService.updateDocument('users', cred.user.uid, { full_name: name });
     } catch (error: any) {
       console.error("Signup failed:", error);
       throw error;

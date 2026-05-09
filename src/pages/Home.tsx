@@ -244,7 +244,18 @@ const Home: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[300px]">
-
+            {/* FEATURE: Man with Land Rover / Result */}
+            <motion.div
+              whileHover={{ scale: 0.98 }}
+              className="md:col-span-2 md:row-span-2 relative group overflow-hidden"
+            >
+              <img src="/gallery/IMG%204.png" alt="Vision" className="w-full h-full object-cover transition-all duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity" />
+              <div className="absolute bottom-10 left-10 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                <h4 className="text-2xl font-heading text-white uppercase tracking-widest">The Result</h4>
+                <p className="text-primary-gold text-sm uppercase tracking-[0.2em] mt-2">Physical Manifestation</p>
+              </div>
+            </motion.div>
 
             {/* Counting Money */}
             <motion.div
@@ -321,6 +332,46 @@ const Home: React.FC = () => {
             >
               <img src="/gallery/5c8e9c69fde33437d8064074da00621b.jpg" alt="5c8e9c69fde33437d8064074da00621b" className="w-full h-full object-cover transition-all duration-700" />
               <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors" />
+            </motion.div>
+
+            {/* Team Kavyati Video */}
+            <motion.div
+              whileHover={{ scale: 0.98 }}
+              className="md:col-span-2 lg:col-span-2 relative group overflow-hidden border-2 border-primary-gold/10"
+            >
+              <video 
+                src="/gallery/Team_Kavyati.mp4" 
+                className="w-full h-full object-cover transition-all duration-700" 
+                autoPlay
+                muted
+                loop
+                playsInline
+                controls
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-6 flex flex-col justify-end pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                <h4 className="text-xl font-heading text-white uppercase mb-1">The Experience</h4>
+                <p className="text-xs text-primary-gold uppercase tracking-widest">Team Kavyati</p>
+              </div>
+            </motion.div>
+
+            {/* Team Kavyati Video 2 */}
+            <motion.div
+              whileHover={{ scale: 0.98 }}
+              className="md:col-span-2 lg:col-span-2 relative group overflow-hidden border-2 border-primary-gold/10"
+            >
+              <video 
+                src="/gallery/teamkavyati2.mp4" 
+                className="w-full h-full object-cover transition-all duration-700" 
+                autoPlay
+                muted
+                loop
+                playsInline
+                controls
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-6 flex flex-col justify-end pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                <h4 className="text-xl font-heading text-white uppercase mb-1">The Lifestyle</h4>
+                <p className="text-xs text-primary-gold uppercase tracking-widest">Team Kavyati</p>
+              </div>
             </motion.div>
           </div>
         </div>
