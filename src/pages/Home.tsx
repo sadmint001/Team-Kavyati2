@@ -249,23 +249,11 @@ const Home: React.FC = () => {
               whileHover={{ scale: 0.98 }}
               className="md:col-span-2 md:row-span-2 relative group overflow-hidden"
             >
-              <img src="/gallery/IMG%201.jfif" alt="Vision" className="w-full h-full object-cover transition-all duration-700" />
+              <img src="/gallery/IMG%204.png" alt="Vision" className="w-full h-full object-cover transition-all duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity" />
               <div className="absolute bottom-10 left-10 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                 <h4 className="text-2xl font-heading text-white uppercase tracking-widest">The Result</h4>
                 <p className="text-primary-gold text-sm uppercase tracking-[0.2em] mt-2">Physical Manifestation</p>
-              </div>
-            </motion.div>
-
-            {/* Stack of Money */}
-            <motion.div
-              whileHover={{ scale: 0.98 }}
-              className="relative group overflow-hidden"
-            >
-              <img src="/gallery/IMG%204.png" alt="Physical" className="w-full h-full object-cover transition-all duration-700" />
-              <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors" />
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="px-4 py-2 bg-primary-gold text-black font-black text-xs tracking-widest uppercase">The Reward</span>
               </div>
             </motion.div>
 
@@ -324,16 +312,25 @@ const Home: React.FC = () => {
               whileHover={{ scale: 0.98 }}
               className="relative group overflow-hidden"
             >
-              <img src="/gallery/image%202.jfif" alt="Dedication" className="w-full h-full object-cover transition-all duration-700" />
+              <img src="/gallery/zimbzbwe.png" alt="zimbzbwe" className="w-full h-full object-cover transition-all duration-700" />
               <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors" />
             </motion.div>
 
             {/* Extra Image 3 */}
             <motion.div
               whileHover={{ scale: 0.98 }}
+              className="relative group overflow-hidden"
+            >
+              <img src="/gallery/02e636f5f67c0f1b47daccb673ffb4b7.jpg" alt="02e636f5f67c0f1b47daccb673ffb4b7" className="w-full h-full object-cover transition-all duration-700" />
+              <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors" />
+            </motion.div>
+
+            {/* Extra Image 4 */}
+            <motion.div
+              whileHover={{ scale: 0.98 }}
               className="md:col-span-2 relative group overflow-hidden"
             >
-              <img src="/gallery/pic%203.jfif" alt="Network" className="w-full h-full object-cover transition-all duration-700" />
+              <img src="/gallery/5c8e9c69fde33437d8064074da00621b.jpg" alt="5c8e9c69fde33437d8064074da00621b" className="w-full h-full object-cover transition-all duration-700" />
               <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors" />
             </motion.div>
           </div>
