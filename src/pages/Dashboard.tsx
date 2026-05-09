@@ -75,7 +75,7 @@ const Dashboard: React.FC = () => {
     {
       id: 'bronze',
       name: 'Bronze',
-      price: '10',
+      price: '10,000',
       icon: <Target className="w-8 h-8 text-orange-400" />,
       features: ['Community access', 'Weekly challenges', 'Accountability check-ins'],
       color: 'bg-orange-950/20 text-orange-400 border-orange-400/30'

@@ -249,7 +249,7 @@ const Home: React.FC = () => {
               whileHover={{ scale: 0.98 }}
               className="md:col-span-2 md:row-span-2 relative group overflow-hidden"
             >
-              <img src="/gallery/zimbzbwe.png" alt="Vision" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+              <img src="/gallery/zimbzbwe.png" alt="Vision" className="w-full h-full object-cover transition-all duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity" />
               <div className="absolute bottom-10 left-10 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                 <h4 className="text-2xl font-heading text-white uppercase tracking-widest">The Result</h4>
@@ -262,7 +262,7 @@ const Home: React.FC = () => {
               whileHover={{ scale: 0.98 }}
               className="relative group overflow-hidden"
             >
-              <img src="/gallery/dc30f6be93afb4822df75a8892d8fd36.jpg" alt="Physical" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+              <img src="/gallery/dc30f6be93afb4822df75a8892d8fd36.jpg" alt="Physical" className="w-full h-full object-cover transition-all duration-700" />
               <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors" />
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <span className="px-4 py-2 bg-primary-gold text-black font-black text-xs tracking-widest uppercase">The Reward</span>
@@ -274,7 +274,7 @@ const Home: React.FC = () => {
               whileHover={{ scale: 0.98 }}
               className="relative group overflow-hidden"
             >
-              <img src="/gallery/98eacbcf15251f4a3845957575ef931a.jpg" alt="Focus" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+              <img src="/gallery/98eacbcf15251f4a3845957575ef931a.jpg" alt="Focus" className="w-full h-full object-cover transition-all duration-700" />
               <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors" />
             </motion.div>
 
@@ -283,7 +283,7 @@ const Home: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               className="lg:col-span-2 relative group overflow-hidden border-2 border-primary-gold/10"
             >
-              <img src="/gallery/chic-handsome-african-american-man-white-suit.jpg" alt="Collaborate" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+              <img src="/gallery/chic-handsome-african-american-man-white-suit.jpg" alt="Collaborate" className="w-full h-full object-cover transition-all duration-700" />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent p-10 flex items-center">
                 <div className="max-w-xs">
                   <h4 className="text-xl font-heading text-white uppercase mb-2">The High Council</h4>
@@ -297,7 +297,7 @@ const Home: React.FC = () => {
               whileHover={{ scale: 0.98 }}
               className="relative group overflow-hidden"
             >
-              <img src="/gallery/6ab81c449e1b4c129e958cd48366f87a.jpg" alt="Drive" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+              <img src="/gallery/6ab81c449e1b4c129e958cd48366f87a.jpg" alt="Drive" className="w-full h-full object-cover transition-all duration-700" />
               <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors" />
             </motion.div>
 
@@ -306,7 +306,7 @@ const Home: React.FC = () => {
               whileHover={{ scale: 0.98 }}
               className="relative group overflow-hidden"
             >
-              <img src="/gallery/stylish-afro-man-beige-old-school-suit-sit-table-street-fashionable-young-african-male-casual-jacket-bare-torso.jpg" alt="Style" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" />
+              <img src="/gallery/stylish-afro-man-beige-old-school-suit-sit-table-street-fashionable-young-african-male-casual-jacket-bare-torso.jpg" alt="Style" className="w-full h-full object-cover transition-all duration-700" />
               <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors" />
             </motion.div>
           </div>
