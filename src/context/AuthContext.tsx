@@ -1,16 +1,22 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { 
-  onAuthStateChanged, 
+import {
+  onAuthStateChanged,
   User,
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  updateProfile
+  updateProfile,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { dbService } from '../lib/db';
+import { hashPin } from '../lib/pinUtils';
+
+// Derives a stable internal Firebase email from a phone number.
+// The user never sees this — it's purely an auth identifier.
+const phoneToEmail = (phone: string) =>
+  `${phone.replace(/\D/g, '')}@kavyati.phone`;
 
 interface AuthContextType {
   user: User | null;
@@ -18,8 +24,8 @@ interface AuthContextType {
   subscriptionTier: 'bronze' | 'silver' | 'gold' | null;
   loading: boolean;
   loginWithGoogle: () => Promise<void>;
-  loginWithEmail: (email: string, pass: string) => Promise<void>;
-  signupWithEmail: (email: string, pass: string, name: string) => Promise<void>;
+  loginWithPhone: (phone: string, pin: string) => Promise<void>;
+  signupWithPhone: (name: string, phone: string, pin: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -32,32 +38,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      if (user) {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
+      if (firebaseUser) {
         try {
-          const userData = await dbService.getDocument('users', user.uid) as any;
+          const userData = await dbService.getDocument('users', firebaseUser.uid) as any;
           if (userData) {
             setRole(userData.role);
             setSubscriptionTier(userData.subscription_tier);
-          } else {
-            // First time login - create user document
-            const newUser = {
-              full_name: user.displayName || 'Anonymous',
-              email: user.email || '',
-              role: 'user',
-              subscription_tier: null,
-              created_at: new Date().toISOString(), // In real app, use serverTimestamp
-              is_suspended: false
-            };
-            // Note: In a real production app, we'd use a server-side creation or cloud function
-            // to ensure strict validation of created_at and role.
-            await dbService.setDocument('users', user.uid, newUser);
-            setRole('user');
-            setSubscriptionTier(null);
           }
         } catch (error) {
-          console.error("Error fetching user data:", error);
+          console.error('Error fetching user data:', error);
         }
       } else {
         setRole(null);
@@ -65,54 +56,72 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       setLoading(false);
     });
-
     return () => unsubscribe();
   }, []);
 
+  // ─── Google Sign-In ───────────────────────────────────────────────────────
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    // Adding custom parameters can sometimes help with popup issues
     provider.setCustomParameters({ prompt: 'select_account' });
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (error: any) {
-      console.error("Firebase Auth Error:", error.code, error.message, error);
-      throw error;
+    const cred = await signInWithPopup(auth, provider);
+    const existing = await dbService.getDocument('users', cred.user.uid) as any;
+    if (!existing) {
+      await dbService.setDocument('users', cred.user.uid, {
+        full_name: cred.user.displayName || 'Member',
+        email: cred.user.email || '',
+        phone_number: cred.user.phoneNumber || '',
+        role: 'user',
+        subscription_tier: null,
+        created_at: new Date().toISOString(),
+        is_suspended: false,
+      });
+      setRole('user');
+      setSubscriptionTier(null);
     }
   };
 
-  const loginWithEmail = async (email: string, pass: string) => {
-    try {
-      await signInWithEmailAndPassword(auth, email, pass);
-    } catch (error: any) {
-      console.error("Email login failed:", error);
-      throw error;
-    }
+  // ─── Phone + PIN Login ────────────────────────────────────────────────────
+  const loginWithPhone = async (phone: string, pin: string) => {
+    const email = phoneToEmail(phone);
+    // PIN hash is used as the Firebase password — deterministic & always ≥64 chars
+    const password = await hashPin(pin);
+    await signInWithEmailAndPassword(auth, email, password);
+    // role/tier will be set by onAuthStateChanged listener
   };
 
-  const signupWithEmail = async (email: string, pass: string, name: string) => {
-    try {
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      await updateProfile(cred.user, { displayName: name });
-      // Fix race condition: onAuthStateChanged may have created the DB record with 'Anonymous' 
-      // before updateProfile finished. Update it here to ensure correct name.
-      await dbService.updateDocument('users', cred.user.uid, { full_name: name });
-    } catch (error: any) {
-      console.error("Signup failed:", error);
-      throw error;
-    }
+  // ─── Phone + PIN Registration ─────────────────────────────────────────────
+  const signupWithPhone = async (name: string, phone: string, pin: string) => {
+    const email = phoneToEmail(phone);
+    const password = await hashPin(pin);
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(cred.user, { displayName: name });
+    await dbService.setDocument('users', cred.user.uid, {
+      full_name: name,
+      phone_number: phone,
+      pin_hash: password, // store hash for future PIN management
+      role: 'user',
+      subscription_tier: null,
+      created_at: new Date().toISOString(),
+      is_suspended: false,
+    });
+    setRole('user');
+    setSubscriptionTier(null);
   };
 
+  // ─── Logout ───────────────────────────────────────────────────────────────
   const logout = async () => {
     try {
       await signOut(auth);
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error('Logout failed:', error);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, role, subscriptionTier, loading, loginWithGoogle, loginWithEmail, signupWithEmail, logout }}>
+    <AuthContext.Provider value={{
+      user, role, subscriptionTier, loading,
+      loginWithGoogle, loginWithPhone, signupWithPhone, logout,
+    }}>
       {children}
     </AuthContext.Provider>
   );
